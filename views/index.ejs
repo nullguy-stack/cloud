@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    
+    <div class="container"  onclick="back()">
+        <div class="forms">
+            <form method="POST" action="/upload" enctype="multipart/form-data">
+                <p class="title">Upload File</p>
+                <input type="file" name="file">
+                <input type="submit" value="Upload">
+                <input type="hidden" name="path" id="path" value="<%=path%>">
+            </form>
+            <form action="/createDir" method="post">
+                <p class="title">Create Folder</p>
+                <label for="dirname"></label>
+                <input type="text" name="dirname">
+                <input type="hidden" name="path" value="<%=path%>">
+                <input type="submit" value="Create">
+            </form>
+        </div>
+
+        <div class="items">
+            <p class="title"><strong style="font-size: 16px;"><%=path%></strong></p>
+            <div class="item-head">
+                <div class="item-name"><strong>Name</strong></div>
+                <div class="item-type"><strong>Type</strong></div>
+                <div class="item-size"><strong>Size</strong></div>
+            </div>
+            <a href="/previous/<%=path.replace('/','-')%>">
+                <div class="item">
+                    <div class="item-image">Go back</div>
+                    <div class="item-name"><em>return to previous folder</em></div>
+                </div>
+            </a>
+            <%for(let file in files){%>
+                <div class="item" onclick="display(this)" id='<%=files[file].name%>' oncontextmenu="display(this)">
+                    <div class="item-name">
+                        <%=files[file].name%>
+                    </div>
+                    <div class="item-type">
+                        <%if(!files[file].ext){%>
+                            folder
+                        <%}else%>
+                            <%=files[file].ext%>
+                    </div>
+                    <div class="item-size">
+                        <%=files[file].size%> bytes
+                    </div>
+                </div>
+            <%}%>
+        </div>
+    </div>
+
+    <div id="menu"></div>
+
+    <script>
+        
+        function back(){
+            let menu = document.getElementById("menu")
+            if (menu.style.display == 'none')
+                menu.style.display = 'block'
+            else
+                menu.style.display = 'none'
+        }
+
+        function display(e){
+            if(event.type == "contextmenu")
+                event.preventDefault()
+            let path = document.getElementById("path").value.replace('/','-')
+            let posY = e.offsetTop
+            let posX = event.clientX
+            if(posY < 150)
+                posY += 50
+            else if(posY > window.outerHeight - 70)
+                posY -= 150            
+            if(posX < 150)
+                posX + 50
+            else if(posX > window.outerWidth - 150)
+                posX -= 150            
+            let downloadLink = "/download/"+ path+"-"+e.id
+            let deleteLink = "/delete/"+ path+"/"+e.id
+            let menu = "<div class='menu' id='"+e.id+"' >"+
+                            "<div class='option-head'>"+
+                                e.id+
+                            "</div>"
+            if(e.children[1].innerText == "folder"){
+                menu += "<a href='"+path+"-"+e.id+"'><div class='option'>"+
+                            "Open"+
+                        "</div></a>"
+                posY -= 20
+            }
+            if(e.children[1].innerText != "folder"){
+                menu +=
+                    "<a href='"+downloadLink+"'><div class='option'>"+
+                        "Download"+
+                    "</div></a>"
+            }
+            menu += 
+                    "<a href='"+deleteLink+"'><div class='option wrong' onclick='erase()'>"+
+                        "Delete"+
+                    "</div></a>"+
+                    "<div class='option' onclick='back()'>"+
+                        "Back"+
+                    "</div>"+
+                "</div>"
+            document.getElementById("menu").style.top = posY + "px"
+            document.getElementById("menu").innerHTML = menu
+            document.getElementById("menu").style.left = posX + "px"
+        }
+    </script>
+
+</body>
+</html>
